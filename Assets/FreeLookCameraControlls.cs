@@ -10,6 +10,8 @@ public class FreeLookCameraControlls : MonoBehaviour
     [SerializeField] float xSensitivity;
     [SerializeField] float ySensitivity;
 
+    hoverController player; 
+
     Vector2 _look;
 
     public void OnLook(InputValue input)
@@ -21,14 +23,15 @@ public class FreeLookCameraControlls : MonoBehaviour
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        player = GetComponent<hoverController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
-        followTarget.transform.rotation *= Quaternion.Lerp(followTarget.transform.rotation, Quaternion.AngleAxis(_look.x * Time.deltaTime * xSensitivity, Vector3.up), 1);
-        followTarget.transform.rotation *= Quaternion.Lerp(followTarget.transform.rotation, Quaternion.AngleAxis(-_look.y * Time.deltaTime * ySensitivity, Vector3.right), 1);
+
+        followTarget.transform.rotation *= Quaternion.Lerp(followTarget.transform.rotation, Quaternion.AngleAxis(_look.x * Time.deltaTime * xSensitivity, transform.up), 1);
+        followTarget.transform.rotation *= Quaternion.Lerp(followTarget.transform.rotation, Quaternion.AngleAxis(-_look.y * Time.deltaTime * ySensitivity, transform.right), 1);
         //followTarget.transform.rotation *= Quaternion.AngleAxis(-_look.y * ySensitivity * Time.deltaTime, Vector3.right);
 
         var angles = followTarget.transform.localEulerAngles;

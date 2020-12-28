@@ -8,6 +8,7 @@ public class hoverController : MonoBehaviour
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private GameObject centerThruster;
     [SerializeField] private List<GameObject> terrainOrientationCasters;
+    [SerializeField] private GameObject frontCounterForceObj;
     [SerializeField] private GameObject massCenter;
     [SerializeField] private GameObject propulsor;
 
@@ -16,6 +17,7 @@ public class hoverController : MonoBehaviour
     [SerializeField] private float hoverConstant = 10f;
     [SerializeField] private float thrusterDistance = 2f;
     [SerializeField] private float jumpForce = 9f;
+    [SerializeField] private float gripForce = 5f;
 
     [SerializeField] float horizontalFriction = 30;
 
@@ -25,6 +27,8 @@ public class hoverController : MonoBehaviour
     private Vector2 _move;
     public bool isGrounded = false;
     public bool isGripping = false;
+    [HideInInspector]
+    public Vector3 averageNormal = Vector3.zero;
 
     // Start is called before the first frame update
     void Start()
@@ -60,10 +64,11 @@ public class hoverController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        CheckAverageNormal();
+        CheckGrounded();
         HandleMovement();
         ApplyHoverForce();
         ApplyGripForce();
-
         _rigidbody.AddForce(transform.TransformDirection(Vector3.right) * -transform.InverseTransformVector(_rigidbody.velocity).x * horizontalFriction);
     }
 
@@ -74,6 +79,7 @@ public class hoverController : MonoBehaviour
         {
             if (isGrounded && _move.y > Mathf.Epsilon)
             {
+                Vector3 floorNormal = averageNormal;
                 Vector3 targetVelocity = new Vector3(0, 0, _move.y);
                 targetVelocity *= propulsionForce;
                 targetVelocity = transform.TransformDirection(targetVelocity);
@@ -83,6 +89,8 @@ public class hoverController : MonoBehaviour
                 velocityChange.x = Mathf.Clamp(velocityChange.x, -maxVelocityChange, maxVelocityChange);
                 velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
                 velocityChange.y = isGripping ? Mathf.Clamp(velocityChange.y, -maxVelocityChange, maxVelocityChange) : 0;
+                velocityChange = Vector3.ProjectOnPlane(velocityChange, floorNormal);
+                Debug.DrawRay(transform.position, velocityChange, Color.red);
                 _rigidbody.AddForceAtPosition(velocityChange, propulsor.transform.position, ForceMode.VelocityChange);
             }
             else
@@ -109,21 +117,23 @@ public class hoverController : MonoBehaviour
         if (Physics.Raycast(centerThruster.transform.position, transform.TransformDirection(Vector3.down), out hit, thrusterDistance, 1 << 8))
         {
             float inpulse = (1 - hit.distance / thrusterDistance);
-            inpulse = Mathf.Pow(inpulse, 2);
+            //inpulse = Mathf.Pow(inpulse, 2);
 
             Vector3 force = transform.TransformDirection(Vector3.up) * inpulse * hoverConstant;
             force += Vector3.down * _rigidbody.mass;
             _rigidbody.AddForceAtPosition(force, centerThruster.transform.position);
-        }
-        else
-        {
-            isGrounded = false;
-        }
-        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.FromToRotation(transform.up, GetAverageNormal()) * transform.rotation, 3.7f * Time.fixedDeltaTime);
+            if (_move.y > Mathf.Epsilon && isGrounded)
+            {
+                _rigidbody.AddForceAtPosition(force * 0.2f, frontCounterForceObj.transform.position);
+
+            }        }
+
+        // TODO: Rotate with torque (maybe)
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.FromToRotation(transform.up, averageNormal) * transform.rotation, 10f * Time.fixedDeltaTime);
 
     }
 
-    private Vector3 GetAverageNormal()
+    private void CheckAverageNormal()
     {
         List<Vector3> hits = new List<Vector3>();
         foreach (GameObject caster in terrainOrientationCasters)
@@ -144,12 +154,7 @@ public class hoverController : MonoBehaviour
         {
             average = average / hits.Count;
         }
-        // WARNING: breaking single risponsibility
-        if (hits.Count >= 3)
-        {
-            isGrounded = true;
-        }
-        return average;
+        averageNormal = average;
 
     }
 
@@ -157,8 +162,20 @@ public class hoverController : MonoBehaviour
     {
         if (isGripping)
         {
-            Debug.DrawRay(transform.position, -transform.up * 12 * _rigidbody.mass);
-            _rigidbody.AddForce(-transform.up * 12 * _rigidbody.mass);
+            Debug.DrawRay(transform.TransformPoint(_rigidbody.centerOfMass), -transform.up * gripForce * _rigidbody.mass, Color.cyan);
+            _rigidbody.AddForce(-transform.up * gripForce * _rigidbody.mass);
+        }
+    }
+
+    private void CheckGrounded()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(centerThruster.transform.position, transform.TransformDirection(Vector3.down), out hit, thrusterDistance + 0.1f, 1 << 8))
+        {
+            isGrounded = true;
+        } else
+        {
+            isGrounded = false;
         }
     }
 }

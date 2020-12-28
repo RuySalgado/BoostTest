@@ -363,7 +363,7 @@
                 {
                     "name": "",
                     "id": "e57b74b1-3f37-43c1-83f3-11ae0e5c1810",
-                    "path": "<Keyboard>/x",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
