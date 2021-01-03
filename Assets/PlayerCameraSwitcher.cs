@@ -26,7 +26,7 @@ public class PlayerCameraSwitcher : MonoBehaviour
             freeLook.gameObject.SetActive(false);
             Debug.Log("enabling");
         }
-        if (!controller.isGripping && controller.isGrounded && !freeLook.isActiveAndEnabled)
+        if (!controller.isGripping || !controller.isGrounded && !freeLook.isActiveAndEnabled)
         {
             freeLook.gameObject.SetActive(true);
             freeLookLocked.gameObject.SetActive(false);

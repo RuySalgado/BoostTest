@@ -55,9 +55,17 @@
                 },
                 {
                     "name": "Grip",
-                    "type": "Value",
+                    "type": "Button",
                     "id": "62e39588-b4fb-4572-8662-6b9349ff73ee",
-                    "expectedControlType": "Axis",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Boost",
+                    "type": "Value",
+                    "id": "942e7028-694c-4488-a72a-c19976bc3250",
+                    "expectedControlType": "Digital",
                     "processors": "",
                     "interactions": ""
                 }
@@ -363,11 +371,22 @@
                 {
                     "name": "",
                     "id": "e57b74b1-3f37-43c1-83f3-11ae0e5c1810",
-                    "path": "<Mouse>/leftButton",
+                    "path": "<Keyboard>/x",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Grip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e3d7a75e-7ab1-404d-9430-c74db723a1a8",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Boost",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

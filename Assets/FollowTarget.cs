@@ -14,6 +14,8 @@ public class FollowTarget : MonoBehaviour
     [SerializeField]
     float zOffset = 0;
 
+    [SerializeField] float rotationAdjustmentSpeed = 0.3f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,5 +25,6 @@ public class FollowTarget : MonoBehaviour
     void FixedUpdate()
     {
         transform.position = followTarget.transform.position + new Vector3(xOffset, yOffset, zOffset);
+        transform.rotation = Quaternion.Lerp(transform.rotation, followTarget.transform.rotation, rotationAdjustmentSpeed * Time.fixedDeltaTime);
     }
 }
